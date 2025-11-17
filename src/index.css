@@ -1,0 +1,52 @@
+﻿:root {
+  font-family: 'Pretendard Variable', 'Noto Sans KR', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+    'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #e2e8f0;
+  background-color: #030712;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-image: radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.15), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 35%),
+    linear-gradient(180deg, #030712 0%, #020617 50%, #020617 100%);
+  color: #e2e8f0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.6);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
