@@ -1,32 +1,65 @@
-﻿// src/components/anime/AnimeCard.jsx
+﻿import { useMemo } from 'react';
 import { useTmdbImage } from '../../hooks/useTmdbImage';
 
+function getDisplayTitle(anime) {
+  return anime.title?.native || anime.title?.english || anime.title?.romaji || '제목 정보 없음';
+}
+
 export default function AnimeCard({ anime, onClick }) {
-  const title = anime.title?.english || anime.title?.romaji || anime.title?.native;
-  const { imageUrl } = useTmdbImage(title);
+  const title = getDisplayTitle(anime);
+  const { imageUrl } = useTmdbImage({
+    title,
+    seasonYear: anime.seasonYear,
+    altTitles: [anime.title?.romaji, anime.title?.native].filter(Boolean),
+  });
   const cover = imageUrl || anime.coverImage?.large;
 
+  const chips = useMemo(() => {
+    const values = [];
+    if (anime.episodes) values.push(`${anime.episodes}화`);
+    if (typeof anime.averageScore === 'number') values.push(`⭐ ${(anime.averageScore / 10).toFixed(1)}`);
+    if (anime.seasonYear) values.push(`${anime.seasonYear}`);
+    return values;
+  }, [anime.episodes, anime.averageScore, anime.seasonYear]);
+
+  const badges = useMemo(() => {
+    const values = [];
+    if (anime.format) values.push(anime.format);
+    if (anime.status) values.push(anime.status === 'RELEASING' ? '방영중' : '완결');
+    return values;
+  }, [anime.format, anime.status]);
+
+  const handleClick = () => {
+    if (!anime?.id) return;
+    onClick?.(anime);
+  };
+
   return (
-    <button
-      type="button"
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 text-left shadow transition hover:-translate-y-1 hover:border-emerald-400"
-      onClick={() => onClick?.(anime)}
-    >
-      {cover && (
-        <img
-          src={cover}
-          alt={title}
-          className="h-56 w-full object-cover transition group-hover:scale-105"
-        />
-      )}
-      <div className="flex flex-1 flex-col gap-2 p-3 text-sm text-slate-200">
-        <h3 className="line-clamp-2 font-semibold text-white">{title}</h3>
-        <div className="flex items-center justify-between text-xs text-slate-400">
-          <span>{anime.format}</span>
-          <span>{anime.seasonYear ?? '-'}</span>
-        </div>
-        <div className="text-xs text-emerald-300">평균 {anime.averageScore ?? '-'}점</div>
+    <article className="anime-card" role="button" tabIndex={0} onClick={handleClick} onKeyDown={(e) => e.key === 'Enter' && handleClick()}>
+      <div className="anime-cover">
+        {cover ? <img src={cover} alt={title} /> : <div className="anime-cover__fallback">이미지를 불러올 수 없어요</div>}
+        <div className="anime-cover__overlay" />
+
+        {badges.length > 0 && (
+          <div className="anime-badges">
+            {badges.map((badge) => (
+              <span key={badge}>{badge}</span>
+            ))}
+          </div>
+        )}
+
+        {chips.length > 0 && (
+          <div className="anime-chips">
+            {chips.map((chip) => (
+              <span key={chip}>{chip}</span>
+            ))}
+          </div>
+        )}
       </div>
-    </button>
+
+      <div className="anime-title" title={title}>
+        {title}
+      </div>
+    </article>
   );
 }

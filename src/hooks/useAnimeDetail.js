@@ -1,5 +1,4 @@
-// src/hooks/useAnimeDetail.js
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { fetchAniList } from '../api/anilistClient';
 
 const ANILIST_ANIME_DETAIL = `
@@ -10,6 +9,7 @@ const ANILIST_ANIME_DETAIL = `
         romaji
         english
         native
+        userPreferred
       }
       coverImage {
         large
@@ -36,7 +36,7 @@ const ANILIST_ANIME_DETAIL = `
         site
         thumbnail
       }
-      relations(type: ANIME) {
+      relations {
         edges {
           relationType
           node {
@@ -45,6 +45,7 @@ const ANILIST_ANIME_DETAIL = `
               romaji
               english
               native
+              userPreferred
             }
             coverImage {
               large
@@ -63,6 +64,7 @@ const ANILIST_ANIME_DETAIL = `
               romaji
               english
               native
+              userPreferred
             }
             coverImage {
               large
@@ -78,7 +80,7 @@ const ANILIST_ANIME_DETAIL = `
 `;
 
 export function useAnimeDetail(id) {
-  const [data, setData] = useState(null); // Media
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 

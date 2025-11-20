@@ -1,8 +1,7 @@
-﻿// src/pages/HomePage.jsx
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import AppLayout from '../components/layout/AppLayout';
 import AnimeSearchBar from '../components/search/AnimeSearchBar';
-import FilterBar from '../components/search/FilterBar';
+import FilterBar, { SORT_OPTIONS } from '../components/search/FilterBar';
 import AnimeList from '../components/anime/AnimeList';
 import AnimeDetailModal from '../components/anime/AnimeDetailModal';
 import { useAniListSearch } from '../hooks/useAniListSearch';
@@ -35,6 +34,7 @@ export default function HomePage() {
   });
 
   const pageInfo = data?.pageInfo;
+  const currentCount = data?.media?.length ?? 0;
 
   const handleSearchSubmit = (value = '') => {
     setSearchTerm(value);
@@ -99,96 +99,69 @@ export default function HomePage() {
 
   return (
     <AppLayout>
-      <section className="space-y-8 py-10">
-        <div className="rounded-[32px] border border-slate-800 bg-slate-900/40 p-6 shadow-2xl shadow-black/50 backdrop-blur">
-          <div className="space-y-2 text-slate-200">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-300/80">
-              Search & Filter
-            </p>
-            <h2 className="text-2xl font-bold text-white">애니 검색 & 맞춤 필터</h2>
-            <p className="text-sm text-slate-400">
-              AniList 데이터로 애니를 검색하고 TMDB 이미지까지 확인하면서, 나만의 추천 리스트를 구성해 보세요.
-            </p>
-          </div>
+      <section className="page-section">
+        <header className="hero-card hero-compact">
+          <AnimeSearchBar initialValue={searchTerm} onSubmit={handleSearchSubmit} />
+        </header>
 
-          <div className="mt-6">
-            <AnimeSearchBar initialValue={searchTerm} onSubmit={handleSearchSubmit} />
-          </div>
-
-          <div className="mt-8">
-            <FilterBar
-              sortMode={sortMode}
-              onSortModeChange={handleSortModeChange}
-              genres={genres}
-              onGenresChange={handleGenresChange}
-              status={status}
-              onStatusChange={handleStatusChange}
-              format={format}
-              onFormatChange={handleFormatChange}
-              episodeRange={episodeRange}
-              onEpisodeRangeChange={handleEpisodeRangeChange}
-              scoreRange={scoreRange}
-              onScoreRangeChange={handleScoreRangeChange}
-              recentYearsOnly={recentYearsOnly}
-              onRecentYearsOnlyChange={handleRecentYearsOnlyChange}
-              onResetFilters={handleResetFilters}
-              onResetGenres={handleResetGenres}
-            />
-          </div>
-        </div>
-
-        <section className="rounded-[32px] border border-slate-800 bg-slate-900/40 p-6 shadow-inner shadow-black/50">
-          <div className="flex flex-col gap-4 text-slate-200 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-white">검색 결과</h3>
-              <p className="text-sm text-slate-400">AniList × TMDB 데이터 매칭 결과를 실시간으로 확인하세요.</p>
+        <div className="layout-grid">
+          <aside className="filter-rail">
+            <div className="filter-scroll">
+              <FilterBar
+                genres={genres}
+                onGenresChange={handleGenresChange}
+                status={status}
+                onStatusChange={handleStatusChange}
+                format={format}
+                onFormatChange={handleFormatChange}
+                episodeRange={episodeRange}
+                onEpisodeRangeChange={handleEpisodeRangeChange}
+                scoreRange={scoreRange}
+                onScoreRangeChange={handleScoreRangeChange}
+                recentYearsOnly={recentYearsOnly}
+                onRecentYearsOnlyChange={handleRecentYearsOnlyChange}
+                onResetFilters={handleResetFilters}
+                onResetGenres={handleResetGenres}
+              />
             </div>
+          </aside>
+
+          <section className="results-card">
+            <div className="results-head">
+              <div>
+                <p className="eyebrow">검색 결과</p>
+                <h3 className="results-title">{currentCount}개 작품</h3>
+                <p className="hero-sub">필터 적용 상태를 좌측에서 확인하세요.</p>
+              </div>
+              <div className="sort-control">
+                <span>정렬</span>
+                <select value={sortMode} onChange={(event) => handleSortModeChange(event.target.value)}>
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <AnimeList pageData={data} loading={loading} error={error} onSelectAnime={handleSelectAnime} />
+
             {pageInfo && (
-              <div className="flex items-center gap-3 text-sm text-slate-300">
-                <button
-                  disabled={pageInfo.currentPage <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded-full border border-slate-600 px-3 py-1 transition disabled:opacity-40 hover:border-emerald-400"
-                >
-                  이전
+              <div className="pager">
+                <button type="button" disabled={pageInfo.currentPage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>
+                  이전 페이지
                 </button>
                 <span>
-                  {pageInfo.currentPage} / {pageInfo.lastPage}
+                  {pageInfo.currentPage} / {pageInfo.lastPage ?? '?'}
                 </span>
-                <button
-                  disabled={!pageInfo.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="rounded-full border border-slate-600 px-3 py-1 transition disabled:opacity-40 hover:border-emerald-400"
-                >
-                  다음
+                <button type="button" disabled={!pageInfo.hasNextPage} onClick={() => setPage((current) => current + 1)}>
+                  다음 페이지
                 </button>
               </div>
             )}
-          </div>
-
-          <div className="mt-6">
-            <AnimeList pageData={data} loading={loading} error={error} onSelectAnime={handleSelectAnime} />
-          </div>
-
-          {pageInfo && (
-            <div className="mt-8 flex justify-center gap-4 text-sm text-slate-300">
-              <button
-                disabled={pageInfo.currentPage <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="rounded-full border border-slate-600 px-4 py-2 transition disabled:opacity-40 hover:border-emerald-400"
-              >
-                이전 페이지
-              </button>
-              <button
-                disabled={!pageInfo.hasNextPage}
-                onClick={() => setPage((p) => p + 1)}
-                className="rounded-full border border-slate-600 px-4 py-2 transition disabled:opacity-40 hover:border-emerald-400"
-              >
-                다음 페이지
-              </button>
-            </div>
-          )}
-        </section>
+          </section>
+        </div>
       </section>
 
       {selectedAnimeId && (

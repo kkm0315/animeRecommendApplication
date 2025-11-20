@@ -1,5 +1,4 @@
-﻿// src/components/search/AnimeSearchBar.jsx
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 
 export default function AnimeSearchBar({ initialValue = '', onSubmit }) {
   const [value, setValue] = useState(initialValue);
@@ -8,8 +7,8 @@ export default function AnimeSearchBar({ initialValue = '', onSubmit }) {
     setValue(initialValue);
   }, [initialValue]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
     onSubmit?.(value.trim());
   };
 
@@ -19,37 +18,35 @@ export default function AnimeSearchBar({ initialValue = '', onSubmit }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 sm:flex-row sm:items-center"
-    >
-      <div className="relative flex-1">
-        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-          🔍
-        </span>
-        <input
-          type="text"
-          placeholder="애니 제목이나 키워드를 입력해 보세요"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          className="w-full rounded-2xl border border-slate-700 bg-slate-900/60 py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 focus:border-emerald-400 focus:outline-none"
-        />
-      </div>
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-        >
-          검색
+    <form className="search-bar" onSubmit={handleSubmit}>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input
+        type="text"
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        placeholder="애니 제목이나 키워드를 입력해 주세요"
+      />
+      {value && (
+        <button type="button" className="ghost" onClick={handleReset}>
+          Reset
         </button>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="rounded-2xl border border-slate-700 px-4 py-3 text-sm text-slate-200 transition hover:border-emerald-400"
-        >
-          초기화
-        </button>
-      </div>
+      )}
+      <button type="submit" className="primary">
+        Search
+      </button>
     </form>
   );
 }
