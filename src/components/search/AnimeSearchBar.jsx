@@ -41,11 +41,11 @@ export default function AnimeSearchBar({ initialValue = '', onSubmit }) {
       />
       {value && (
         <button type="button" className="ghost" onClick={handleReset}>
-          Reset
+          초기화
         </button>
       )}
       <button type="submit" className="primary">
-        Search
+        검색
       </button>
     </form>
   );

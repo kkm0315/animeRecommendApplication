@@ -6,7 +6,7 @@ import AnimeList from '../components/anime/AnimeList';
 import AnimeDetailModal from '../components/anime/AnimeDetailModal';
 import { useAniListSearch } from '../hooks/useAniListSearch';
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 28;
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -131,7 +131,7 @@ export default function HomePage() {
               <div>
                 <p className="eyebrow">검색 결과</p>
                 <h3 className="results-title">{currentCount}개 작품</h3>
-                <p className="hero-sub">필터 적용 상태를 좌측에서 확인하세요.</p>
+                <p className="hero-sub">필터를 바꾸며 더 정확하게 찾아보세요.</p>
               </div>
               <div className="sort-control">
                 <span>정렬</span>

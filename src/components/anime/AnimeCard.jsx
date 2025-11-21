@@ -1,33 +1,37 @@
 ﻿import { useMemo } from 'react';
-import { useTmdbImage } from '../../hooks/useTmdbImage';
+
+const FORMAT_LABELS = {
+  TV: 'TV',
+  MOVIE: '영화',
+  OVA: 'OVA',
+  ONA: 'ONA',
+  SPECIAL: '스페셜',
+};
+
+const containsHangul = (text = '') => /[가-힣]/.test(text);
+
+function getFormatLabel(format) {
+  return FORMAT_LABELS[format] || format || '';
+}
 
 function getDisplayTitle(anime) {
-  return anime.title?.native || anime.title?.english || anime.title?.romaji || '제목 정보 없음';
+  const title = anime?.title || {};
+  if (containsHangul(title.native)) return title.native;
+  return title.english || title.romaji || title.native || '제목을 찾을 수 없어요';
 }
 
 export default function AnimeCard({ anime, onClick }) {
   const title = getDisplayTitle(anime);
-  const { imageUrl } = useTmdbImage({
-    title,
-    seasonYear: anime.seasonYear,
-    altTitles: [anime.title?.romaji, anime.title?.native].filter(Boolean),
-  });
-  const cover = imageUrl || anime.coverImage?.large;
+  const cover = anime.coverImage?.extraLarge || anime.coverImage?.large;
 
-  const chips = useMemo(() => {
-    const values = [];
-    if (anime.episodes) values.push(`${anime.episodes}화`);
-    if (typeof anime.averageScore === 'number') values.push(`⭐ ${(anime.averageScore / 10).toFixed(1)}`);
-    if (anime.seasonYear) values.push(`${anime.seasonYear}`);
-    return values;
-  }, [anime.episodes, anime.averageScore, anime.seasonYear]);
+  const scoreText = useMemo(
+    () => (typeof anime.averageScore === 'number' ? `★ ${(anime.averageScore / 10).toFixed(1)}` : ''),
+    [anime.averageScore],
+  );
+  const episodesText = useMemo(() => (anime.episodes ? `${anime.episodes}화` : ''), [anime.episodes]);
+  const formatText = useMemo(() => getFormatLabel(anime.format), [anime.format]);
 
-  const badges = useMemo(() => {
-    const values = [];
-    if (anime.format) values.push(anime.format);
-    if (anime.status) values.push(anime.status === 'RELEASING' ? '방영중' : '완결');
-    return values;
-  }, [anime.format, anime.status]);
+  const hasMeta = episodesText || scoreText;
 
   const handleClick = () => {
     if (!anime?.id) return;
@@ -40,19 +44,12 @@ export default function AnimeCard({ anime, onClick }) {
         {cover ? <img src={cover} alt={title} /> : <div className="anime-cover__fallback">이미지를 불러올 수 없어요</div>}
         <div className="anime-cover__overlay" />
 
-        {badges.length > 0 && (
-          <div className="anime-badges">
-            {badges.map((badge) => (
-              <span key={badge}>{badge}</span>
-            ))}
-          </div>
-        )}
+        {formatText && <div className="anime-badge format">{formatText}</div>}
 
-        {chips.length > 0 && (
-          <div className="anime-chips">
-            {chips.map((chip) => (
-              <span key={chip}>{chip}</span>
-            ))}
+        {hasMeta && (
+          <div className="anime-meta">
+            <span className="anime-meta__left">{episodesText}</span>
+            <span className="anime-meta__right">{scoreText}</span>
           </div>
         )}
       </div>

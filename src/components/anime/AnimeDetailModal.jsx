@@ -1,8 +1,25 @@
 ﻿import { useEffect } from 'react';
 import { useAnimeDetail } from '../../hooks/useAnimeDetail';
-import { useTmdbImage } from '../../hooks/useTmdbImage';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
+
+const FORMAT_LABELS = {
+  TV: 'TV',
+  MOVIE: '영화',
+  OVA: 'OVA',
+  ONA: 'ONA',
+  SPECIAL: '스페셜',
+};
+
+const STATUS_LABELS = {
+  RELEASING: '방영중',
+  FINISHED: '완결',
+  NOT_YET_RELEASED: '방영 예정',
+  CANCELLED: '취소',
+  HIATUS: '휴재/휴방',
+};
+
+const containsHangul = (text = '') => /[가-힣]/.test(text);
 
 function formatDescription(description) {
   if (!description) return '설명이 준비되지 않았어요.';
@@ -11,6 +28,20 @@ function formatDescription(description) {
     .replace(/<[^>]+>/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+function formatLabel(format) {
+  return FORMAT_LABELS[format] || format || '-';
+}
+
+function statusLabel(status) {
+  return STATUS_LABELS[status] || status || '-';
+}
+
+function getDisplayTitle(media) {
+  const title = media?.title || {};
+  if (containsHangul(title.native)) return title.native;
+  return title.english || title.romaji || title.native || '제목을 찾을 수 없어요';
 }
 
 function DetailRow({ label, value }) {
@@ -35,15 +66,10 @@ function ScrollerSection({ title, children }) {
 
 export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) {
   const { data: media, loading, error } = useAnimeDetail(animeId);
-  const title = media?.title?.native || media?.title?.english || media?.title?.romaji || '제목 정보 없음';
 
-  const altTitles = [media?.title?.romaji, media?.title?.native].filter(Boolean);
-  const { imageUrl, backdropUrl } = useTmdbImage({
-    title,
-    seasonYear: media?.seasonYear,
-    altTitles,
-  });
-  const poster = imageUrl || media?.coverImage?.extraLarge || media?.coverImage?.large;
+  const title = getDisplayTitle(media);
+  const poster = media?.coverImage?.extraLarge || media?.coverImage?.large;
+  const heroImage = media?.bannerImage;
 
   useEffect(() => {
     if (!animeId) return undefined;
@@ -57,7 +83,7 @@ export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) 
   if (!animeId) return null;
 
   const infoChips = [
-    media?.format,
+    formatLabel(media?.format),
     media?.seasonYear && `${media.seasonYear}년`,
     media?.episodes && `${media.episodes}화`,
     typeof media?.averageScore === 'number' && `평점 ${(media.averageScore / 10).toFixed(1)}`,
@@ -75,7 +101,7 @@ export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) 
     <div className="modal-backdrop" role="dialog" aria-modal="true" onClick={handleBackdropClick}>
       <div className="modal-card">
         <button type="button" className="modal-close" onClick={() => onClose?.()} aria-label="닫기">
-          ✕
+          ×
         </button>
 
         {loading && (
@@ -93,14 +119,10 @@ export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) 
         {!loading && !error && media && (
           <>
             <div className="modal-hero">
-              {backdropUrl || media.bannerImage ? (
-                <img src={backdropUrl || media.bannerImage} alt={title} />
-              ) : (
-                <div className="modal-hero__fallback" />
-              )}
+              {heroImage ? <img src={heroImage} alt={title} /> : <div className="modal-hero__fallback" />}
               <div className="modal-hero__overlay" />
               <div className="modal-hero__text">
-                <p className="eyebrow">AniLife 상세</p>
+                <p className="eyebrow">AniLife 추천</p>
                 <h2>{title}</h2>
                 <div className="chip-row">
                   {infoChips.map((chip) => (
@@ -123,18 +145,9 @@ export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) 
                   ))}
                 </div>
                 <div className="detail-rows">
-                  <DetailRow
-                    label="방영 상태"
-                    value={
-                      media.status === 'RELEASING'
-                        ? '방영중'
-                        : media.status === 'FINISHED'
-                          ? '완결'
-                          : media.status || '-'
-                    }
-                  />
+                  <DetailRow label="방영 상태" value={statusLabel(media.status)} />
                   <DetailRow label="제작 스튜디오" value={media.studios?.nodes?.[0]?.name || '-'} />
-                  <DetailRow label="인기도" value={media.popularity ?? '-'} />
+                  <DetailRow label="인기도" value={media.popularity?.toLocaleString('ko-KR') ?? '-'} />
                 </div>
                 {media.trailer?.id && media.trailer.site === 'youtube' && (
                   <a
@@ -160,12 +173,12 @@ export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) 
                   {media.recommendations.nodes.map((node) => {
                     const rec = node.mediaRecommendation;
                     if (!rec) return null;
-                    const recTitle = rec.title?.native || rec.title?.english || rec.title?.romaji;
+                    const recTitle = getDisplayTitle(rec);
                     return (
                       <button key={rec.id} type="button" className="scroller-card" onClick={() => onSelectRelated?.(rec.id)}>
                         {rec.coverImage?.large && <img src={rec.coverImage.large} alt={recTitle} />}
                         <p className="scroller-card__title">{recTitle}</p>
-                        <p className="scroller-card__meta">{rec.format} · {rec.seasonYear || '-'}</p>
+                        <p className="scroller-card__meta">{formatLabel(rec.format)} · {rec.seasonYear || '-'}</p>
                       </button>
                     );
                   })}
@@ -177,7 +190,7 @@ export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) 
                   {media.relations.edges.map((edge) => {
                     const node = edge.node;
                     if (!node) return null;
-                    const relTitle = node.title?.native || node.title?.english || node.title?.romaji;
+                    const relTitle = getDisplayTitle(node);
                     return (
                       <button key={node.id} type="button" className="scroller-card" onClick={() => onSelectRelated?.(node.id)}>
                         {node.coverImage?.large && <img src={node.coverImage.large} alt={relTitle} />}

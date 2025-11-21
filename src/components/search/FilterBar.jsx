@@ -1,7 +1,7 @@
 ﻿export const SORT_OPTIONS = [
   { value: 'POPULARITY', label: '인기 순' },
   { value: 'SCORE', label: '평점 순' },
-  { value: 'TRENDING', label: '트렌드' },
+  { value: 'TRENDING', label: '트렌딩' },
   { value: 'LATEST', label: '최신 방영' },
   { value: 'HYBRID', label: '추천 (평점+인기)' },
 ];
@@ -29,7 +29,7 @@ const STATUS_OPTIONS = [
 const FORMAT_OPTIONS = [
   { value: 'ANY', label: '전체' },
   { value: 'TV', label: 'TV' },
-  { value: 'MOVIE', label: '극장판' },
+  { value: 'MOVIE', label: '영화' },
   { value: 'OVA', label: 'OVA' },
   { value: 'ONA', label: 'ONA' },
   { value: 'SPECIAL', label: '스페셜' },
@@ -120,7 +120,7 @@ export default function FilterBar({
       <div className="filter-panel__head">
         <h2>필터</h2>
         <button type="button" className="link" onClick={onResetFilters}>
-          필터 초기화
+          전체 초기화
         </button>
       </div>
 
