@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react';
+﻿// src/hooks/useAnimeDetail.js
+import { useEffect, useState } from 'react';
 import { fetchAniList } from '../api/anilistClient';
 
 const ANILIST_ANIME_DETAIL = `
