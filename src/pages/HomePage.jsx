@@ -133,12 +133,21 @@ export default function HomePage() {
     }
   };
 
+  const handleFavoritesViewToggle = () => {
+    if (!user) {
+      alert('로그인 후 즐겨찾기를 사용할 수 있습니다.');
+      return;
+    }
+    setShowFavoritesOnly((prev) => !prev);
+    setPage(1);
+  };
+
   const displayedData = showFavoritesOnly ? { media: favorites } : data;
   const effectiveLoading = showFavoritesOnly ? favoritesLoading : loading;
   const effectiveError = showFavoritesOnly ? favoritesError : error;
 
   const favoriteCount = favorites.length;
-  const favoritesDisabled = !user || favoritesLoading;
+  const favoritesDisabled = favoritesLoading;
   const userLabel = user?.displayName || user?.email || '로그인됨';
 
   return (
@@ -172,7 +181,7 @@ export default function HomePage() {
                     type="button"
                     className={`ghost ${showFavoritesOnly ? 'is-active' : ''}`}
                     disabled={favoritesDisabled}
-                    onClick={() => setShowFavoritesOnly((prev) => !prev)}
+                    onClick={handleFavoritesViewToggle}
                   >
                     즐겨찾기만 보기
                   </button>
