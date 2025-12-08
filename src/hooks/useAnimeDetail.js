@@ -1,6 +1,6 @@
 ﻿// src/hooks/useAnimeDetail.js
-import { useEffect, useState } from 'react';
-import { fetchAniList } from '../api/anilistClient';
+import { useEffect, useState } from "react";
+import { fetchAniList } from "../api/anilistClient";
 
 const ANILIST_ANIME_DETAIL = `
   query AnimeDetail($id: Int) {
@@ -8,9 +8,6 @@ const ANILIST_ANIME_DETAIL = `
       id
       title {
         romaji
-        english
-        native
-        userPreferred
       }
       coverImage {
         large
@@ -44,9 +41,6 @@ const ANILIST_ANIME_DETAIL = `
             id
             title {
               romaji
-              english
-              native
-              userPreferred
             }
             coverImage {
               large
@@ -63,9 +57,6 @@ const ANILIST_ANIME_DETAIL = `
             id
             title {
               romaji
-              english
-              native
-              userPreferred
             }
             coverImage {
               large

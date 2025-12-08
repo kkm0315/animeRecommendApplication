@@ -24,8 +24,11 @@ function toFavoriteShape(anime) {
     format: anime.format,
     episodes: anime.episodes,
     averageScore: anime.averageScore,
+    popularity: anime.popularity,
   };
 }
+
+const normalize = (text = '') => text.toLowerCase();
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,6 +36,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [selectedAnimeId, setSelectedAnimeId] = useState(null);
   const [user, setUser] = useState(null);
+  const [authToken, setAuthToken] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   const [favoritesError, setFavoritesError] = useState(null);
@@ -52,10 +56,13 @@ export default function HomePage() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       setFavoritesError(null);
+
       if (currentUser) {
         setFavoritesLoading(true);
         try {
-          const favs = await fetchFavorites({ userId: currentUser.uid });
+          const token = await currentUser.getIdToken();
+          setAuthToken(token);
+          const favs = await fetchFavorites({ userId: currentUser.uid, idToken: token });
           setFavorites(favs);
         } catch (fetchErr) {
           console.error(fetchErr);
@@ -64,6 +71,7 @@ export default function HomePage() {
           setFavoritesLoading(false);
         }
       } else {
+        setAuthToken(null);
         setFavorites([]);
         setFavoritesLoading(false);
       }
@@ -72,6 +80,33 @@ export default function HomePage() {
   }, []);
 
   const favoriteIds = useMemo(() => new Set(favorites.map((item) => item.id)), [favorites]);
+
+  const filterFavorites = () => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return favorites;
+    return favorites.filter((anime) => {
+      const title = anime.title || {};
+      return [title.romaji].filter(Boolean).some((t) => normalize(t).includes(term));
+    });
+  };
+
+  const sortFavorites = (items) => {
+    switch (sortMode) {
+      case 'SCORE':
+        return [...items].sort((a, b) => (b.averageScore || 0) - (a.averageScore || 0));
+      case 'HYBRID':
+        return [...items].sort((a, b) => {
+          const ha = (a.averageScore || 0) * 0.7 + (a.popularity || 0) * 0.3;
+          const hb = (b.averageScore || 0) * 0.7 + (b.popularity || 0) * 0.3;
+          return hb - ha;
+        });
+      case 'POPULARITY':
+      default:
+        return [...items].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    }
+  };
+
+  const favoritesViewData = useMemo(() => sortFavorites(filterFavorites()), [favorites, searchTerm, sortMode]);
 
   const handleSearchSubmit = (value = '') => {
     setSearchTerm(value);
@@ -103,12 +138,23 @@ export default function HomePage() {
     setShowFavoritesOnly(false);
   };
 
+  const ensureToken = async () => {
+    if (authToken) return authToken;
+    if (!auth.currentUser) return null;
+    const token = await auth.currentUser.getIdToken();
+    setAuthToken(token);
+    return token;
+  };
+
   const handleToggleFavorite = async (anime) => {
     if (!user) {
       alert('즐겨찾기를 사용하려면 로그인해 주세요.');
       return;
     }
     if (!anime?.id) return;
+
+    const token = await ensureToken();
+    if (!token) return;
 
     const exists = favoriteIds.has(anime.id);
     setFavoritesError(null);
@@ -119,9 +165,9 @@ export default function HomePage() {
 
     try {
       if (exists) {
-        await removeFavorite({ userId: user.uid, animeId: anime.id });
+        await removeFavorite({ userId: user.uid, idToken: token, animeId: anime.id });
       } else {
-        await saveFavorite({ userId: user.uid, anime: toFavoriteShape(anime) });
+        await saveFavorite({ userId: user.uid, idToken: token, anime: toFavoriteShape(anime) });
       }
     } catch (e) {
       setFavoritesError(e);
@@ -142,11 +188,11 @@ export default function HomePage() {
     setPage(1);
   };
 
-  const displayedData = showFavoritesOnly ? { media: favorites } : data;
+  const displayedData = showFavoritesOnly ? { media: favoritesViewData } : data;
   const effectiveLoading = showFavoritesOnly ? favoritesLoading : loading;
   const effectiveError = showFavoritesOnly ? favoritesError : error;
 
-  const favoriteCount = favorites.length;
+  const favoriteCount = favoritesViewData.length;
   const favoritesDisabled = favoritesLoading;
   const userLabel = user?.displayName || user?.email || '로그인됨';
 
@@ -242,3 +288,4 @@ export default function HomePage() {
     </div>
   );
 }
+

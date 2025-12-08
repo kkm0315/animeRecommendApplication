@@ -23,22 +23,15 @@ const ANILIST_SEARCH_QUERY = `
         id
         title {
           romaji
-          english
-          native
         }
         coverImage {
           large
         }
-        bannerImage
         episodes
         averageScore
         popularity
-        genres
         format
         status
-        season
-        seasonYear
-        description(asHtml: false)
       }
     }
   }
@@ -118,3 +111,6 @@ export function useAniListSearch({ searchTerm, sortMode = 'POPULARITY', page = 1
 
   return { data, loading, error };
 }
+
+
+

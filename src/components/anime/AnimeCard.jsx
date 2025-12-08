@@ -8,16 +8,13 @@ const FORMAT_LABELS = {
   SPECIAL: '스페셜',
 };
 
-const containsHangul = (text = '') => /[가-힣]/.test(text);
-
 function getFormatLabel(format) {
   return FORMAT_LABELS[format] || format || '';
 }
 
 function getDisplayTitle(anime) {
   const title = anime?.title || {};
-  if (containsHangul(title.native)) return title.native;
-  return title.english || title.romaji || title.native || '제목을 찾을 수 없어요';
+  return title.romaji || '제목을 찾을 수 없어요';
 }
 
 export default function AnimeCard({ anime, onClick, isFavorite = false, onToggleFavorite, isLoggedIn }) {
