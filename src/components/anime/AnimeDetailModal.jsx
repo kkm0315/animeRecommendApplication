@@ -1,7 +1,5 @@
 ﻿import { useEffect } from 'react';
 import { useAnimeDetail } from '../../hooks/useAnimeDetail';
-import LoadingSpinner from '../common/LoadingSpinner';
-import ErrorMessage from '../common/ErrorMessage';
 
 const FORMAT_LABELS = {
   TV: 'TV',
@@ -24,7 +22,8 @@ const containsHangul = (text = '') => /[가-힣]/.test(text);
 function formatDescription(description) {
   if (!description) return '설명이 준비되지 않았어요.';
   return description
-    .replace(/<br\s*\/?>(?=\n)?/gi, '\n')
+    .replace(/<br\s*\/?> (?=\n)?/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<[^>]+>/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -106,13 +105,13 @@ export default function AnimeDetailModal({ animeId, onClose, onSelectRelated }) 
 
         {loading && (
           <div className="modal-body">
-            <LoadingSpinner />
+            <p>불러오는 중...</p>
           </div>
         )}
 
         {error && !loading && (
           <div className="modal-body">
-            <ErrorMessage message={error.message} />
+            <p>데이터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>
           </div>
         )}
 

@@ -20,7 +20,7 @@ function getDisplayTitle(anime) {
   return title.english || title.romaji || title.native || '제목을 찾을 수 없어요';
 }
 
-export default function AnimeCard({ anime, onClick }) {
+export default function AnimeCard({ anime, onClick, isFavorite = false, onToggleFavorite, isLoggedIn }) {
   const title = getDisplayTitle(anime);
   const cover = anime.coverImage?.extraLarge || anime.coverImage?.large;
 
@@ -38,6 +38,15 @@ export default function AnimeCard({ anime, onClick }) {
     onClick?.(anime);
   };
 
+  const handleFavoriteToggle = (event) => {
+    event.stopPropagation();
+    if (!isLoggedIn) {
+      alert('로그인 후 즐겨찾기를 사용할 수 있습니다.');
+      return;
+    }
+    onToggleFavorite?.(anime);
+  };
+
   return (
     <article className="anime-card" role="button" tabIndex={0} onClick={handleClick} onKeyDown={(e) => e.key === 'Enter' && handleClick()}>
       <div className="anime-cover">
@@ -45,6 +54,16 @@ export default function AnimeCard({ anime, onClick }) {
         <div className="anime-cover__overlay" />
 
         {formatText && <div className="anime-badge format">{formatText}</div>}
+
+        <button
+          type="button"
+          className={`favorite-btn ${isFavorite ? 'is-active' : ''}`}
+          aria-pressed={isFavorite}
+          aria-label={isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+          onClick={handleFavoriteToggle}
+        >
+          ★
+        </button>
 
         {hasMeta && (
           <div className="anime-meta">
