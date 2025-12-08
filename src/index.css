@@ -72,7 +72,6 @@ a {
 
 .hero-card,
 .results-card,
-.filter-rail,
 .modal-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
@@ -82,6 +81,11 @@ a {
 
 .hero-card.hero-compact {
   padding: 14px;
+}
+
+.hero-card {
+  width: min(1100px, 100%);
+  margin: 0 auto;
 }
 
 .hero-search {
@@ -115,7 +119,7 @@ a {
 }
 
 .search-bar {
-  width: min(900px, 100%);
+  width: min(1100px, 100%);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -176,116 +180,18 @@ button.link,
 }
 
 .layout-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 16px;
-  align-items: start;
-}
-
-@media (max-width: 1100px) {
-  .layout-grid {
-    grid-template-columns: 1fr;
-  }
-  .filter-rail {
-    position: relative;
-    top: 0;
-    max-height: none;
-  }
-}
-
-.filter-rail {
-  position: sticky;
-  top: 12px;
-  padding: 12px;
-  max-height: calc(100vh - 100px);
-  overflow: hidden;
-}
-
-.filter-scroll {
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.filter-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  color: #e2e8f0;
-}
-
-.filter-panel__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.filter-panel__head h2 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.filter-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-section__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.filter-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-option {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
-  transition: border-color 0.15s ease, background 0.15s ease;
-  font-size: 14px;
-}
-
-.filter-option input {
-  width: 16px;
-  height: 16px;
-}
-
-.filter-option.is-active {
-  border-color: #34d399;
-  background: rgba(52, 211, 153, 0.12);
-}
-
-.filter-option.toggle {
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.toggle__title {
-  margin: 0;
-  font-weight: 700;
-}
-
-.toggle__subtitle {
-  margin: 3px 0 0;
-  font-size: 12px;
-  color: #94a3b8;
+  width: 100%;
 }
 
 .results-card {
-  padding: 14px;
+  padding: 18px;
   background: rgba(2, 7, 15, 0.9);
+  width: min(1100px, 100%);
+  margin: 0 auto;
 }
 
 .results-head {
@@ -675,3 +581,11 @@ button.link,
   font-size: 12px;
   color: #94a3b8;
 }
+
+
+
+
+
+
+
+

@@ -1,36 +1,29 @@
 ﻿import { useState } from 'react';
 import AppLayout from '../components/layout/AppLayout';
 import AnimeSearchBar from '../components/search/AnimeSearchBar';
-import FilterBar, { SORT_OPTIONS } from '../components/search/FilterBar';
 import AnimeList from '../components/anime/AnimeList';
 import AnimeDetailModal from '../components/anime/AnimeDetailModal';
 import { useAniListSearch } from '../hooks/useAniListSearch';
 
 const PAGE_SIZE = 28;
 
+const SORT_OPTIONS = [
+  { value: 'POPULARITY', label: '인기 순' },
+  { value: 'SCORE', label: '평점 순' },
+  { value: 'HYBRID', label: '추천 (평점+인기)' },
+];
+
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortMode, setSortMode] = useState('POPULARITY');
-  const [genres, setGenres] = useState([]);
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState('ANY');
-  const [format, setFormat] = useState('ANY');
-  const [episodeRange, setEpisodeRange] = useState('ANY');
-  const [scoreRange, setScoreRange] = useState('ANY');
-  const [recentYearsOnly, setRecentYearsOnly] = useState(false);
   const [selectedAnimeId, setSelectedAnimeId] = useState(null);
 
   const { data, loading, error } = useAniListSearch({
     searchTerm,
     sortMode,
-    genres,
     page,
     perPage: PAGE_SIZE,
-    status,
-    format,
-    episodeRange,
-    scoreRange,
-    recentYearsOnly,
   });
 
   const pageInfo = data?.pageInfo;
@@ -46,53 +39,6 @@ export default function HomePage() {
     setPage(1);
   };
 
-  const handleGenresChange = (newGenres) => {
-    setGenres(newGenres);
-    setPage(1);
-  };
-
-  const handleStatusChange = (value) => {
-    setStatus(value);
-    setPage(1);
-  };
-
-  const handleFormatChange = (value) => {
-    setFormat(value);
-    setPage(1);
-  };
-
-  const handleEpisodeRangeChange = (value) => {
-    setEpisodeRange(value);
-    setPage(1);
-  };
-
-  const handleScoreRangeChange = (value) => {
-    setScoreRange(value);
-    setPage(1);
-  };
-
-  const handleRecentYearsOnlyChange = (checked) => {
-    setRecentYearsOnly(checked);
-    setPage(1);
-  };
-
-  const handleResetFilters = () => {
-    setSortMode('POPULARITY');
-    setStatus('ANY');
-    setFormat('ANY');
-    setEpisodeRange('ANY');
-    setScoreRange('ANY');
-    setRecentYearsOnly(false);
-    setGenres([]);
-    setSearchTerm('');
-    setPage(1);
-  };
-
-  const handleResetGenres = () => {
-    setGenres([]);
-    setPage(1);
-  };
-
   const handleSelectAnime = (anime) => {
     setSelectedAnimeId(anime.id);
   };
@@ -105,33 +51,12 @@ export default function HomePage() {
         </header>
 
         <div className="layout-grid">
-          <aside className="filter-rail">
-            <div className="filter-scroll">
-              <FilterBar
-                genres={genres}
-                onGenresChange={handleGenresChange}
-                status={status}
-                onStatusChange={handleStatusChange}
-                format={format}
-                onFormatChange={handleFormatChange}
-                episodeRange={episodeRange}
-                onEpisodeRangeChange={handleEpisodeRangeChange}
-                scoreRange={scoreRange}
-                onScoreRangeChange={handleScoreRangeChange}
-                recentYearsOnly={recentYearsOnly}
-                onRecentYearsOnlyChange={handleRecentYearsOnlyChange}
-                onResetFilters={handleResetFilters}
-                onResetGenres={handleResetGenres}
-              />
-            </div>
-          </aside>
-
           <section className="results-card">
             <div className="results-head">
               <div>
                 <p className="eyebrow">검색 결과</p>
                 <h3 className="results-title">{currentCount}개 작품</h3>
-                <p className="hero-sub">필터를 바꾸며 더 정확하게 찾아보세요.</p>
+                <p className="hero-sub">검색어나 정렬을 조정해 원하는 작품을 찾아보세요.</p>
               </div>
               <div className="sort-control">
                 <span>정렬</span>
@@ -149,7 +74,11 @@ export default function HomePage() {
 
             {pageInfo && (
               <div className="pager">
-                <button type="button" disabled={pageInfo.currentPage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>
+                <button
+                  type="button"
+                  disabled={pageInfo.currentPage <= 1}
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                >
                   이전 페이지
                 </button>
                 <span>
