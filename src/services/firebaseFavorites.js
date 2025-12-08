@@ -8,15 +8,14 @@ function ensureConfig() {
 }
 
 function toFirestoreFields(anime, userId) {
+  const titleValue = typeof anime.title === 'string' ? anime.title : anime.title?.romaji;
   return {
     userId: { stringValue: userId },
     animeId: { integerValue: String(anime.id) },
-    format: anime.format ? { stringValue: anime.format } : undefined,
-    averageScore:
-      typeof anime.averageScore === 'number' ? { integerValue: String(anime.averageScore) } : undefined,
+    averageScore: typeof anime.averageScore === 'number' ? { integerValue: String(anime.averageScore) } : undefined,
     episodes: typeof anime.episodes === 'number' ? { integerValue: String(anime.episodes) } : undefined,
     popularity: typeof anime.popularity === 'number' ? { integerValue: String(anime.popularity) } : undefined,
-    titleRomaji: anime.title?.romaji ? { stringValue: anime.title.romaji } : undefined,
+    titleRomaji: titleValue ? { stringValue: titleValue } : undefined,
     coverImage: anime.coverImage?.large ? { stringValue: anime.coverImage.large } : undefined,
   };
 }
@@ -35,18 +34,16 @@ function fromFirestoreDoc(doc) {
 
   return {
     id: animeId,
-    title: {
-      romaji: fields.titleRomaji?.stringValue || '',
-    },
+    title: fields.titleRomaji?.stringValue || '',
     coverImage: {
       large: fields.coverImage?.stringValue || '',
     },
-    format: fields.format?.stringValue || '',
     averageScore: parseIntField(fields.averageScore),
     episodes: parseIntField(fields.episodes),
     popularity: parseIntField(fields.popularity),
   };
 }
+
 export async function fetchFavorites({ userId, idToken }) {
   ensureConfig();
   if (!userId || !idToken) return [];
@@ -112,11 +109,3 @@ export async function removeFavorite({ userId, idToken, animeId }) {
     },
   });
 }
-
-
-
-
-
-
-
-

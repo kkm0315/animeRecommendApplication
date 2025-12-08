@@ -1,32 +1,17 @@
-﻿import { useMemo } from 'react';
-
-const FORMAT_LABELS = {
-  TV: 'TV',
-  MOVIE: '영화',
-  OVA: 'OVA',
-  ONA: 'ONA',
-  SPECIAL: '스페셜',
-};
-
-function getFormatLabel(format) {
-  return FORMAT_LABELS[format] || format || '';
-}
-
-function getDisplayTitle(anime) {
-  const title = anime?.title || {};
-  return title.romaji || '제목을 찾을 수 없어요';
+﻿function getDisplayTitle(anime) {
+  const title = anime?.title;
+  if (typeof title === 'string') return title;
+  if (title && typeof title === 'object' && title.romaji) return title.romaji;
+  return '제목을 찾을 수 없어요';
 }
 
 export default function AnimeCard({ anime, onClick, isFavorite = false, onToggleFavorite, isLoggedIn }) {
   const title = getDisplayTitle(anime);
   const cover = anime.coverImage?.extraLarge || anime.coverImage?.large;
 
-  const scoreText = useMemo(
-    () => (typeof anime.averageScore === 'number' ? `★ ${(anime.averageScore / 10).toFixed(1)}` : ''),
-    [anime.averageScore],
-  );
-  const episodesText = useMemo(() => (anime.episodes ? `${anime.episodes}화` : ''), [anime.episodes]);
-  const formatText = useMemo(() => getFormatLabel(anime.format), [anime.format]);
+  // 간단한 문자열 계산은 바로 처리
+  const scoreText = typeof anime.averageScore === 'number' ? `★ ${(anime.averageScore / 10).toFixed(1)}` : '';
+  const episodesText = anime.episodes ? `${anime.episodes}화` : '';
 
   const hasMeta = episodesText || scoreText;
 
@@ -49,8 +34,6 @@ export default function AnimeCard({ anime, onClick, isFavorite = false, onToggle
       <div className="anime-cover">
         {cover ? <img src={cover} alt={title} /> : <div className="anime-cover__fallback">이미지를 불러올 수 없어요</div>}
         <div className="anime-cover__overlay" />
-
-        {formatText && <div className="anime-badge format">{formatText}</div>}
 
         <button
           type="button"

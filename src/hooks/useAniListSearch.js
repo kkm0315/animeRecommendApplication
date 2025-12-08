@@ -21,17 +21,11 @@ const ANILIST_SEARCH_QUERY = `
         sort: $sort
       ) {
         id
-        title {
-          romaji
-        }
-        coverImage {
-          large
-        }
+        title { romaji }
+        coverImage { large }
         episodes
         averageScore
         popularity
-        format
-        status
       }
     }
   }
@@ -51,15 +45,9 @@ export function useAniListSearch({ searchTerm, sortMode = 'POPULARITY', page = 1
 
       try {
         let sort = ['POPULARITY_DESC'];
-        let useHybridSort = false;
-
         switch (sortMode) {
           case 'SCORE':
             sort = ['SCORE_DESC'];
-            break;
-          case 'HYBRID':
-            sort = ['SCORE_DESC', 'POPULARITY_DESC'];
-            useHybridSort = true;
             break;
           case 'POPULARITY':
           default:
@@ -75,27 +63,9 @@ export function useAniListSearch({ searchTerm, sortMode = 'POPULARITY', page = 1
         };
 
         const result = await fetchAniList(ANILIST_SEARCH_QUERY, variables);
-
         if (ignore) return;
 
-        let pageData = result.Page;
-
-        if (pageData?.media && useHybridSort) {
-          const sortedMedia = [...pageData.media].sort((a, b) => {
-            const scoreA = a.averageScore || 0;
-            const scoreB = b.averageScore || 0;
-            const popA = a.popularity || 0;
-            const popB = b.popularity || 0;
-
-            const hybridA = scoreA * 0.7 + popA * 0.3;
-            const hybridB = scoreB * 0.7 + popB * 0.3;
-
-            return hybridB - hybridA;
-          });
-          pageData = { ...pageData, media: sortedMedia };
-        }
-
-        setData(pageData);
+        setData(result.Page);
       } catch (e) {
         if (!ignore) setError(e);
       } finally {
@@ -111,6 +81,3 @@ export function useAniListSearch({ searchTerm, sortMode = 'POPULARITY', page = 1
 
   return { data, loading, error };
 }
-
-
-
